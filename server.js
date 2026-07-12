@@ -11,8 +11,8 @@ app.use((req, res, next) => {
   next();
 });
 
-const PORT = Number(process.env.PORT) || 3000;
-const AGENT_URL = process.env.AGENT_URL || 'http://orbit-agent:4000';
+const PORT = Number(process.env.PORT) || 8080;
+const AGENT_URL = process.env.AGENT_URL || 'http://orbit-agent:9090';
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'orbit-backend' }));
 
