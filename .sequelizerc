@@ -1,0 +1,8 @@
+const path = require('path');
+
+// Keep Sequelize's default layout but pin the config to a .js file so it can
+// read DATABASE_URL and reuse db.js's dev unix-socket quirk (see config/config.js).
+module.exports = {
+  config: path.resolve(__dirname, 'config', 'config.js'),
+  'migrations-path': path.resolve(__dirname, 'migrations'),
+};

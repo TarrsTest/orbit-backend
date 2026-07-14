@@ -4,8 +4,8 @@
 // DATABASE_URL / REDIS_URL for the local sidecars (dev) and the managed
 // instances (staging/live); the localhost fallbacks below only matter when you
 // run `node server.js` by hand outside the sandbox.
-const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 const { Pool } = require('pg');
 const Redis = require('ioredis');
 
@@ -38,16 +38,21 @@ const pool = new Pool(pgConfig(DATABASE_URL));
 const redis = new Redis(REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 2 });
 redis.on('error', (e) => console.error(`[orbit-backend] redis error: ${e.message}`));
 
-// Apply every migrations/*.sql in order. Files are idempotent
-// (CREATE ... IF NOT EXISTS), so this is safe on every boot.
-async function migrate() {
-  const dir = path.join(__dirname, 'migrations');
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
-  for (const f of files) {
-    const sql = fs.readFileSync(path.join(dir, f), 'utf8');
-    await pool.query(sql);
-    console.log(`[orbit-backend] migration applied: ${f}`);
-  }
+// Run pending Sequelize migrations (migrations/*.js) before the app serves.
+// sequelize-cli tracks applied migrations in the SequelizeMeta table, so this
+// only runs what's new and is safe on every boot/deploy. We invoke the CLI
+// through node explicitly (no reliance on the shebang / exec bit) and share the
+// process env so it picks up the injected DATABASE_URL.
+function migrate() {
+  const cli = path.join(__dirname, 'node_modules', 'sequelize-cli', 'lib', 'sequelize');
+  return new Promise((resolve, reject) => {
+    execFile(process.execPath, [cli, 'db:migrate'], { cwd: __dirname, env: process.env }, (err, stdout, stderr) => {
+      if (stdout) process.stdout.write(stdout);
+      if (stderr) process.stderr.write(stderr);
+      if (err) return reject(err);
+      resolve();
+    });
+  });
 }
 
 module.exports = { pool, redis, migrate };
