@@ -15,7 +15,8 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 // The dev sandbox's local Postgres authenticates via its unix socket (trust);
 // its localhost TCP listener wants a password we don't hold. So for a
 // passwordless localhost URL (the injected dev default) connect over the
-// socket. Remote URLs (staging/live, which carry a password) go through as-is.
+// socket. Remote URLs (staging/live, which carry a password) go through as-is,
+// but over TLS — the managed Postgres enforces encryption.
 function pgConfig(url) {
   const u = new URL(url);
   const isLocal = u.hostname === 'localhost' || u.hostname === '127.0.0.1';
@@ -28,7 +29,7 @@ function pgConfig(url) {
       max: 5,
     };
   }
-  return { connectionString: url, max: 5 };
+  return { connectionString: url, max: 5, ssl: { rejectUnauthorized: false } };
 }
 
 const pool = new Pool(pgConfig(DATABASE_URL));
