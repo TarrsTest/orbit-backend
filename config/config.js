@@ -20,7 +20,8 @@ function build(url) {
       database: decodeURIComponent(u.pathname.slice(1)) || 'postgres',
     };
   }
-  return { dialect: 'postgres', url };
+  // Remote managed Postgres (staging/live) enforces TLS — connect with SSL.
+  return { dialect: 'postgres', url, dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } };
 }
 
 const cfg = build(DATABASE_URL);
