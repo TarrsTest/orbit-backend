@@ -1,2 +1,5 @@
 .DS_Store
 node_modules/
+
+# Added by Tarrs — tarrs-cli env set writes this file. Don't commit secrets.
+.env
