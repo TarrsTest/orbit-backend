@@ -14,7 +14,10 @@ app.use((req, res, next) => {
 });
 
 const PORT = Number(process.env.PORT) || 8080;
-const AGENT_URL = process.env.AGENT_URL || 'http://orbit-agent:9090';
+const AGENT_URL =
+  process.env.ORBIT_AGENT_URL || // injected by Tarrs on staging/live
+  process.env.AGENT_URL ||       // manual override
+  'http://localhost:9090';       // dev: services share one sandbox
 const RUNS_COUNT_KEY = 'orbit:runs:count';
 const RUNS_RECENT_KEY = 'orbit:runs:recent';
 
