@@ -4,4 +4,7 @@
 
 const DEFAULT_PAGE_SIZE = 20;
 
-module.exports = { DEFAULT_PAGE_SIZE };
+// Old clients still send v1 payloads.
+const LEGACY_MODE = process.env.EVALKIT_LEGACY === '1';
+
+module.exports = { DEFAULT_PAGE_SIZE, LEGACY_MODE };
