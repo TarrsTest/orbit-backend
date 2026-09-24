@@ -12,7 +12,7 @@ test('GET /api/text end-to-end through the mounted router', async () => {
 
     const ok = await fetch(`${base}?title=Hello%20World&body=one%20two%20three`);
     assert.strictEqual(ok.status, 200);
-    assert.deepStrictEqual(await ok.json(), { slug: 'hello-world', minutes: 1 });
+    assert.deepStrictEqual(await ok.json(), { slug: 'hello-world', minutes: 1, words: 3 });
 
     const bad = await fetch(base);
     assert.strictEqual(bad.status, 400);
