@@ -19,7 +19,7 @@ Part of the **orbit** project: `orbit-backend` (public) + `orbit-agent`
 reading time of the body:
 
 ```json
-{ "slug": "hello-world", "minutes": 1, "words": 3 }
+{ "slug": "hello-world", "minutes": 1 }
 ```
 
 A missing or blank `title` returns `400`:
@@ -31,5 +31,6 @@ A missing or blank `title` returns `400`:
 Helpers live in `lib/text`:
 
 - `toSlug(title, maxLength = 60)` — URL-safe slug, Unicode-aware.
-- `readingTime(text, { wpm = 200 }) -> { minutes, words }` — word count and
-  whole minutes, rounding up; throws a `RangeError` when `wpm <= 0`.
+- `readingTime(text, { wpm = 200 }) -> minutes` — whole minutes, rounding up;
+  returns `0` for empty/whitespace-only text and throws a `RangeError` when
+  `wpm` is not a positive finite number.
