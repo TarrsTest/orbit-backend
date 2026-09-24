@@ -42,3 +42,23 @@ test('toSlug: keeps CJK letters', () => {
 test('toSlug: defaults maxLength to 60', () => {
   assert.strictEqual(toSlug('a'.repeat(80)), 'a'.repeat(60));
 });
+
+test('toSlug: truncation never splits a surrogate pair into a lone half', () => {
+  const astral = '\u{1D49C}'; // MATHEMATICAL SCRIPT CAPITAL A — a \p{L} astral char
+  const result = toSlug(astral.repeat(2), 1);
+  assert.strictEqual(result, astral);
+  assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(result), 'must not contain a lone surrogate');
+  assert.doesNotThrow(() => encodeURIComponent(result));
+});
+
+test('toSlug: maxLength counts astral letters as one character each', () => {
+  const astral = '\u{1D49C}';
+  assert.strictEqual(toSlug(astral.repeat(3), 2), astral.repeat(2));
+});
+
+test('toSlug: mixed ASCII + astral input stays well-formed when truncated', () => {
+  const result = toSlug(`x${'\u{1D49C}'.repeat(30)}`, 20);
+  assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(result), 'must not contain a lone surrogate');
+  assert.doesNotThrow(() => encodeURIComponent(result));
+  assert.strictEqual([...result].length, 20);
+});
